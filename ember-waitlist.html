@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ember — Still Burning</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,400;1,9..144,300;1,9..144,400&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    :root {
+      --bg: #09080A;
+      --surface-2: #131113;
+      --border: rgba(242,240,235,0.07);
+      --text: #F0EDE6;
+      --muted: rgba(240,237,230,0.42);
+      --faint: rgba(240,237,230,0.18);
+      --amber: #C97B2A;
+      --amber-l: #E2913D;
+      --font-d: 'Fraunces', Georgia, serif;
+      --font-b: 'Inter', system-ui, sans-serif;
+    }
+    html { -webkit-font-smoothing: antialiased; }
+    body {
+      min-height: 100dvh;
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--font-b);
+      overflow-x: hidden;
+      position: relative;
+    }
+    body::after {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.055'/%3E%3C/svg%3E");
+      opacity: 0.45; pointer-events: none; z-index: 999;
+    }
+    .glow {
+      position: fixed; bottom: -28vh; left: 50%; transform: translateX(-50%);
+      width: 80vw; max-width: 860px; height: 60vh;
+      background: radial-gradient(ellipse at 50% 100%, rgba(201,123,42,0.13) 0%, rgba(201,123,42,0.04) 45%, transparent 70%);
+      pointer-events: none; z-index: 0;
+    }
+    .page {
+      position: relative; z-index: 1; min-height: 100dvh;
+      display: grid; grid-template-rows: auto 1fr auto;
+    }
+    /* NAV */
+    nav {
+      padding: clamp(18px,3vw,30px) clamp(20px,5vw,48px);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    .logo { display: flex; align-items: center; gap: 9px; }
+    .logo-name { font-family: var(--font-d); font-size: 17px; font-weight: 400; letter-spacing: 0.03em; }
+    .badge {
+      font-size: 10px; font-weight: 500; letter-spacing: 0.13em; text-transform: uppercase;
+      color: var(--muted); border: 1px solid var(--border); padding: 5px 13px; border-radius: 100px;
+    }
+    /* HERO */
+    .hero {
+      display: flex; flex-direction: column; align-items: center;
+      justify-content: center; text-align: center;
+      padding: clamp(28px,5vw,70px) 24px clamp(56px,8vw,96px);
+    }
+    .tally {
+      display: flex; align-items: center; gap: 4px; margin-bottom: 46px;
+      opacity: 0; animation: rise 0.9s cubic-bezier(.16,1,.3,1) 0.15s forwards;
+    }
+    .tm { border-radius: 2px; background: var(--amber); opacity: 0.65; }
+    .tm-v { width: 2px; height: 20px; }
+    .tm-d { width: 26px; height: 2px; transform: rotate(-68deg) translateX(-3px); margin-left: -13px; margin-right: -2px; }
+    .eyebrow {
+      font-size: 11px; font-weight: 500; letter-spacing: 0.15em; text-transform: uppercase;
+      color: var(--amber); margin-bottom: 20px;
+      opacity: 0; animation: rise 0.8s cubic-bezier(.16,1,.3,1) 0.25s forwards;
+    }
+    h1 {
+      font-family: var(--font-d);
+      font-size: clamp(78px,15.5vw,158px);
+      font-weight: 300; line-height: 0.88; letter-spacing: -0.025em;
+      opacity: 0; animation: rise 1s cubic-bezier(.16,1,.3,1) 0.05s forwards;
+    }
+    h1 em { font-style: italic; color: var(--amber); }
+    .tagline {
+      font-family: var(--font-d); font-size: clamp(16px,2.4vw,23px);
+      font-weight: 300; font-style: italic; color: var(--muted);
+      margin-top: 16px; margin-bottom: 48px;
+      opacity: 0; animation: rise 0.8s cubic-bezier(.16,1,.3,1) 0.38s forwards;
+    }
+    .copy {
+      max-width: 390px; font-size: 15px; font-weight: 300; color: var(--muted);
+      line-height: 1.8; margin-bottom: 42px;
+      opacity: 0; animation: rise 0.8s cubic-bezier(.16,1,.3,1) 0.48s forwards;
+    }
+    /* FORM */
+    .form-wrap {
+      width: 100%; max-width: 400px;
+      opacity: 0; animation: rise 0.8s cubic-bezier(.16,1,.3,1) 0.58s forwards;
+    }
+    .form-row { display: flex; gap: 8px; }
+    input[type="email"] {
+      flex: 1; min-width: 0;
+      background: var(--surface-2); border: 1px solid var(--border);
+      border-radius: 8px; padding: 14px 16px;
+      font-family: var(--font-b); font-size: 14px; color: var(--text); outline: none;
+      transition: border-color 180ms ease, box-shadow 180ms ease;
+    }
+    input[type="email"]::placeholder { color: var(--faint); }
+    input[type="email"]:focus {
+      border-color: rgba(201,123,42,0.45);
+      box-shadow: 0 0 0 3px rgba(201,123,42,0.09);
+    }
+    .btn {
+      background: var(--amber); color: #09080A; border: none; border-radius: 8px;
+      padding: 14px 20px; font-family: var(--font-b); font-size: 13px;
+      font-weight: 600; letter-spacing: 0.04em; cursor: pointer; white-space: nowrap;
+      transition: background 160ms ease, transform 100ms ease;
+    }
+    .btn:hover { background: var(--amber-l); }
+    .btn:active { transform: scale(0.97); }
+    .form-note { margin-top: 13px; font-size: 11.5px; color: var(--faint); letter-spacing: 0.02em; }
+    /* SUCCESS */
+    .success { display: none; flex-direction: column; align-items: center; gap: 10px; }
+    .success.show { display: flex; }
+    .check-circle {
+      width: 42px; height: 42px; border-radius: 50%;
+      border: 1px solid rgba(201,123,42,0.25); background: rgba(201,123,42,0.07);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .success-title { font-family: var(--font-d); font-size: 20px; font-weight: 400; font-style: italic; }
+    .success-sub { font-size: 13px; color: var(--muted); }
+    /* COUNTER */
+    .counter {
+      margin-top: 40px; display: flex; align-items: center; gap: 10px;
+      opacity: 0; animation: rise 0.8s cubic-bezier(.16,1,.3,1) 0.72s forwards;
+    }
+    .dots { display: flex; gap: 4px; }
+    .dot { width: 5px; height: 5px; border-radius: 50%; background: var(--amber); }
+    .dot:nth-child(2) { opacity: 0.5; }
+    .dot:nth-child(3) { opacity: 0.25; }
+    .counter-text { font-size: 12px; color: var(--faint); }
+    .counter-text strong { color: var(--muted); font-weight: 500; }
+    /* FOOTER */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: clamp(18px,2.5vw,26px) clamp(20px,5vw,48px);
+      display: flex; align-items: center; justify-content: center;
+      gap: clamp(18px,4vw,50px); flex-wrap: wrap;
+    }
+    .feat {
+      display: flex; align-items: center; gap: 9px;
+      opacity: 0; animation: rise 0.6s cubic-bezier(.16,1,.3,1) forwards;
+    }
+    .feat:nth-child(1){animation-delay:.95s} .feat:nth-child(2){animation-delay:1.05s}
+    .feat:nth-child(3){animation-delay:1.15s} .feat:nth-child(4){animation-delay:1.25s}
+    .feat-dot { width: 4px; height: 4px; border-radius: 50%; background: var(--amber); opacity: 0.55; flex-shrink: 0; }
+    .feat-label { font-size: 11px; font-weight: 400; letter-spacing: 0.08em; text-transform: uppercase; color: var(--faint); }
+    @keyframes rise { from{opacity:0;transform:translateY(18px)} to{opacity:1;transform:translateY(0)} }
+    @keyframes shake { 0%,100%{transform:translateX(0)} 20%,60%{transform:translateX(-5px)} 40%,80%{transform:translateX(5px)} }
+    .shake { animation: shake 0.35s ease; }
+    @media(max-width:520px){
+      .form-row{flex-direction:column}
+      .btn{padding:15px;text-align:center}
+      footer{justify-content:flex-start;gap:14px}
+    }
+  </style>
+</head>
+<body>
+<div class="glow"></div>
+<div class="page">
+
+  <nav>
+    <div class="logo">
+      <svg width="26" height="26" viewBox="0 0 26 26" fill="none" aria-hidden="true">
+        <path d="M13 23C13 23 5.5 18.5 5.5 12.5C5.5 9.2 7.8 6.8 10.2 6.3C9.7 8.7 11 10.5 13 10.5C11.5 7.8 12.5 4 15.8 3C15.8 3 18.8 6.8 17 10.5C18.3 9.5 19.8 8.2 19.8 8.2C19.8 8.2 21 9.8 21 12.5C21 18.5 13 23 13 23Z" fill="#C97B2A" opacity="0.92"/>
+        <path d="M13 21C13 21 9.5 17.8 9.5 14C9.5 12.2 11 11.2 12.5 11.2C12 12.5 13 13.8 13.5 13.8C13 12.5 13.5 10.5 15 9.5C15 9.5 16.5 11.5 15.5 13.8C16 12.8 17 12.5 17 12.5C17 12.5 17.5 13.5 17.5 14.5C17.5 18 13 21 13 21Z" fill="#09080A" opacity="0.55"/>
+      </svg>
+      <span class="logo-name">Ember</span>
+    </div>
+    <span class="badge">Coming Soon</span>
+  </nav>
+
+  <main class="hero">
+    <div class="tally" aria-hidden="true">
+      <div class="tm tm-v"></div>
+      <div class="tm tm-v"></div>
+      <div class="tm tm-v"></div>
+      <div class="tm tm-v"></div>
+      <div class="tm tm-d"></div>
+    </div>
+    <p class="eyebrow">Day one starts here</p>
+    <h1>Em<em>ber</em></h1>
+    <p class="tagline">Still burning.</p>
+    <p class="copy">Most men are losing a battle they won't talk about.<br>Ember is built for the ones who've decided to fight back.</p>
+
+    <div class="form-wrap">
+      <div id="form-el">
+        <div class="form-row">
+          <input type="email" id="email" placeholder="your@email.com" autocomplete="email" aria-label="Email address"/>
+          <button class="btn" onclick="join()">Join waitlist</button>
+        </div>
+        <p class="form-note">No spam. Just a message when we launch.</p>
+      </div>
+      <div class="success" id="done">
+        <div class="check-circle">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#C97B2A" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+        </div>
+        <p class="success-title">You're in.</p>
+        <p class="success-sub">We'll reach out when Ember launches.</p>
+      </div>
+    </div>
+
+    <div class="counter">
+      <div class="dots"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
+      <p class="counter-text"><strong id="cnum">847</strong>&nbsp;people already committed</p>
+    </div>
+  </main>
+
+  <footer>
+    <div class="feat"><div class="feat-dot"></div><span class="feat-label">Streak tracking</span></div>
+    <div class="feat"><div class="feat-dot"></div><span class="feat-label">Daily check-in</span></div>
+    <div class="feat"><div class="feat-dot"></div><span class="feat-label">Accountability</span></div>
+    <div class="feat"><div class="feat-dot"></div><span class="feat-label">iOS &amp; Android</span></div>
+  </footer>
+
+</div>
+<script>
+  (function(){
+    const el=document.getElementById('cnum');
+    let n=824;
+    const tick=()=>{ n++; el.textContent=n.toLocaleString(); if(n<847) setTimeout(()=>requestAnimationFrame(tick),55); };
+    setTimeout(()=>requestAnimationFrame(tick),980);
+  })();
+  function join(){
+    const inp=document.getElementById('email');
+    if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(inp.value.trim())){
+      inp.classList.remove('shake'); void inp.offsetWidth; inp.classList.add('shake');
+      inp.style.borderColor='rgba(180,50,50,0.5)';
+      setTimeout(()=>{ inp.style.borderColor=''; },1000);
+      inp.focus(); return;
+    }
+    document.getElementById('form-el').style.display='none';
+    document.getElementById('done').classList.add('show');
+    const el=document.getElementById('cnum');
+    el.textContent=(parseInt(el.textContent.replace(/,/g,''))+1).toLocaleString();
+  }
+  document.getElementById('email').addEventListener('keydown',e=>{ if(e.key==='Enter') join(); });
+</script>
+</body>
+</html>
